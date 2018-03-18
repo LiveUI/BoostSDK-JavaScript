@@ -1,4 +1,3 @@
-import { Dictionary } from './Dictionary';
 import { Config } from '../Boost';
 
 export interface Networkable {}
@@ -6,6 +5,8 @@ export interface Networkable {}
 export class Networking implements Networkable {
 
     config: Config;
+
+    jwt: string | null = null;
 
     // Initialization
 
@@ -15,7 +16,7 @@ export class Networking implements Networkable {
 
     // Requests
 
-    public get(path: string, headers: Dictionary<string> = {}): Promise<Response> {
+    public get(path: string, headers: Headers = new Headers()): Promise<Response> {
         path = this.config.url + path;
         const promise = new Promise<Response>((resolve, reject) => {
             return window.fetch(path, {
@@ -26,7 +27,7 @@ export class Networking implements Networkable {
         return promise;
     }
 
-    public postJson = (path: string, json: Object, headers: Dictionary<string> = {}): Promise<Response> => {
+    public postJson = (path: string, json: Object, headers: Headers = new Headers()): Promise<Response> => {
         path = this.config.url + path;
         const promise = window.fetch(path, {
             body: JSON.stringify(json),
@@ -36,7 +37,7 @@ export class Networking implements Networkable {
         return promise;
     }
 
-    public postData = (path: string, data: string, headers: Dictionary<string> = {}): Promise<Response> => {
+    public postData = (path: string, data: string, headers: Headers = new Headers()): Promise<Response> => {
         path = this.config.url + path;
         const promise = window.fetch(path, {
             body: data,
@@ -46,7 +47,7 @@ export class Networking implements Networkable {
         return promise;
     }
 
-    put = (path: string, json: JSON, headers: Dictionary<string> = {}): Promise<Response> => {
+    put = (path: string, json: JSON, headers: Headers = new Headers()): Promise<Response> => {
         path = this.config.url + path;
         const promise = window.fetch(path, {
             body: JSON.stringify(json),
@@ -56,7 +57,7 @@ export class Networking implements Networkable {
         return promise;
     }
 
-    patch = (path: string, json: JSON, headers: Dictionary<string> = {}): Promise<Response> => {
+    patch = (path: string, json: JSON, headers: Headers = new Headers()): Promise<Response> => {
         path = this.config.url + path;
         const promise = window.fetch(path, {
             body: JSON.stringify(json),
@@ -66,7 +67,7 @@ export class Networking implements Networkable {
         return promise;
     }
 
-    delete = (path: string, headers: Dictionary<string> = {}): Promise<Response> => {
+    delete = (path: string, headers: Headers = new Headers()): Promise<Response> => {
         path = this.config.url + path;
         const promise = new Promise<Response>((resolve, reject) => {
             return window.fetch(path, {
@@ -79,9 +80,19 @@ export class Networking implements Networkable {
 
     // Private interface
 
-    private headers = (headers: Dictionary<string>): Dictionary<string> => {
-        headers['Content-Type'] = 'application/json';
-        headers['User-Agent'] = 'BoostSDK/1.0-JS';
+    private headers = (headers: Headers): Headers => {
+        headers = this.appendHeader(headers, 'Content-Type', 'application/json');
+        if (this.jwt) {
+            headers = this.appendHeader(headers, 'Authorization', this.jwt);
+        }
+        headers = this.appendHeader(headers, 'User-Agent', 'BoostSDK/1.0-JS');
+        return headers;
+    }
+
+    private appendHeader = (headers: Headers, header: string, value: string): Headers => {
+        if (!headers.has(header)) {
+            headers.append(header, value);
+        }
         return headers;
     }
 
