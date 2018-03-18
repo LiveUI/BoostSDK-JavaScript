@@ -2,7 +2,7 @@
 import { Networking } from './Libs/Networking';
 
 export class Config {
-    public url: string = 'http://localhost:8080';
+    public url: string = 'https://boostappstore.herokuapp.com';
 }
 
 export class Boost {
